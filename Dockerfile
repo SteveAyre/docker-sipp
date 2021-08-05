@@ -5,8 +5,10 @@ RUN apt-get update && apt-get install -y build-essential cmake libssl-dev libpca
 
 ADD https://github.com/SIPp/sipp/releases/download/v3.6.1/sipp-3.6.1.tar.gz /
 RUN tar -xf /sipp-3.6.1.tar.gz
+ADD patches/ /sipp-patches/
 
 WORKDIR /sipp-3.6.1
+RUN for PATCH in /sipp-patches/*.patch; do patch -p1 <$PATCH; done
 RUN ./build.sh --full
 RUN make install
 
