@@ -20,6 +20,7 @@ FROM ubuntu:latest AS target
 # binary and deps
 RUN apt-get update && apt-get install -y libssl1.1 libpcap0.8-dev libsctp1 libtinfo6 libuuid1
 COPY --from=builder /sipp-3.6.1/sipp /usr/local/bin/sipp
+COPY --from=builder /sipp-3.6.1/pcap /sipp/pcap
 
 # run
 WORKDIR /sipp
