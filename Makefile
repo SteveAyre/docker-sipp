@@ -2,7 +2,7 @@
 IMAGE_NAME=steveayre/sipp
 
 VERSION=3.6.1
-BUILD_NUMBER=2
+BUILD_NUMBER=3
 
 .PHONY: image
 image:

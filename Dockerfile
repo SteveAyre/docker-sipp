@@ -4,7 +4,7 @@ ARG VERSION
 
 # build deps
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get update && apt-get install -y build-essential cmake libssl-dev libpcap-dev libsctp-dev libncurses5-dev uuid-dev
+RUN apt-get update && apt-get install -y build-essential cmake libssl-dev libpcap-dev libsctp-dev libncurses5-dev libgsl-dev uuid-dev
 
 # source
 WORKDIR /
@@ -23,7 +23,7 @@ FROM ubuntu:latest AS target
 ARG VERSION
 
 # binary and deps
-RUN apt-get update && apt-get install -y libssl3 libpcap0.8-dev libsctp1 libtinfo6 libuuid1
+RUN apt-get update && apt-get install -y libssl3 libpcap0.8-dev libsctp1 libtinfo6 libgsl27 libuuid1
 COPY --from=builder /src/sipp /usr/local/bin/sipp
 COPY --from=builder /src/pcap /sipp/pcap
 
