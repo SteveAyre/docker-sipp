@@ -1,8 +1,8 @@
 
 IMAGE_NAME=steveayre/sipp
 
-VERSION=3.6.1
-BUILD_NUMBER=3
+VERSION=3.7.1
+BUILD_NUMBER=1
 
 .PHONY: image
 image:

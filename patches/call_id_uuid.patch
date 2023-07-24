@@ -1,7 +1,7 @@
-diff -pubr sipp-3.6.1.orig/CMakeLists.txt sipp-3.6.1/CMakeLists.txt
---- sipp-3.6.1.orig/CMakeLists.txt	2020-09-16 21:22:56.000000000 +0100
-+++ sipp-3.6.1/CMakeLists.txt	2021-08-06 12:01:27.282585200 +0100
-@@ -23,6 +23,7 @@ option(USE_SSL "Build with SIPS support"
+diff -pubr sipp-3.7.1.orig/CMakeLists.txt sipp-3.7.1/CMakeLists.txt
+--- sipp-3.7.1.orig/CMakeLists.txt	2023-05-19 21:21:53.000000000 +0100
++++ sipp-3.7.1/CMakeLists.txt	2023-07-24 11:10:20.812071916 +0100
+@@ -24,6 +24,7 @@ option(USE_SSL "Build with SIPS support"
  option(USE_SCTP "Build with SCTP support" OFF)
  option(USE_PCAP "Build with PCAP playback support" OFF)
  option(USE_GSL "Build with improved statistical support" ON)
@@ -9,7 +9,7 @@ diff -pubr sipp-3.6.1.orig/CMakeLists.txt sipp-3.6.1/CMakeLists.txt
  
  file(GLOB all_SRCS
    "${PROJECT_SOURCE_DIR}/src/*.cpp"
-@@ -81,6 +82,10 @@ if(USE_SCTP)
+@@ -120,6 +121,10 @@ if(USE_SCTP)
    add_definitions("-DUSE_SCTP")
  endif(USE_SCTP)
  
@@ -17,10 +17,10 @@ diff -pubr sipp-3.6.1.orig/CMakeLists.txt sipp-3.6.1/CMakeLists.txt
 +  add_definitions("-DUSE_UUID")
 +endif(USE_UUID)
 +
- add_definitions("-DRTP_STREAM")
- 
  # add the executable
-@@ -178,4 +183,14 @@ if(USE_SCTP)
+ link_directories("/usr/local/lib")
+ add_executable(sipp ${all_SRCS} "${PROJECT_SOURCE_DIR}/src/sipp.cpp")
+@@ -252,4 +257,14 @@ if(USE_SCTP)
    endif()
  endif()
  
@@ -35,9 +35,9 @@ diff -pubr sipp-3.6.1.orig/CMakeLists.txt sipp-3.6.1/CMakeLists.txt
 +endif()
 +
  install(TARGETS sipp DESTINATION bin)
-diff -pubr sipp-3.6.1.orig/build.sh sipp-3.6.1/build.sh
---- sipp-3.6.1.orig/build.sh	2020-09-16 21:22:56.000000000 +0100
-+++ sipp-3.6.1/build.sh	2021-08-06 10:57:17.592585200 +0100
+diff -pubr sipp-3.7.1.orig/build.sh sipp-3.7.1/build.sh
+--- sipp-3.7.1.orig/build.sh	2023-05-19 21:21:53.000000000 +0100
++++ sipp-3.7.1/build.sh	2023-07-24 11:09:12.492068706 +0100
 @@ -19,9 +19,9 @@ fi
  if test "$*" = "--none"; then
      cmake . -DUSE_GSL=
@@ -48,14 +48,15 @@ diff -pubr sipp-3.6.1.orig/build.sh sipp-3.6.1/build.sh
 -    cmake . -DUSE_GSL=1 -DUSE_PCAP=1 -DUSE_SSL=1 -DUSE_SCTP=1
 +    cmake . -DUSE_GSL=1 -DUSE_UUID=1 -DUSE_PCAP=1 -DUSE_SSL=1 -DUSE_SCTP=1
  else
-     cmake . "$@"
- fi
-diff -pubr sipp-3.6.1.orig/src/call.cpp sipp-3.6.1/src/call.cpp
---- sipp-3.6.1.orig/src/call.cpp	2020-09-16 21:22:56.000000000 +0100
-+++ sipp-3.6.1/src/call.cpp	2021-08-06 10:50:03.352585200 +0100
-@@ -51,6 +51,10 @@
- #include <sys/types.h>
+     # Debug build? Add -DDEBUG=1
+     # Adjusted SIP max size? Add -DSIPP_MAX_MSG_SIZE=262144
+Only in sipp-3.7.1: build.sh.orig
+diff -pubr sipp-3.7.1.orig/src/call.cpp sipp-3.7.1/src/call.cpp
+--- sipp-3.7.1.orig/src/call.cpp	2023-05-19 21:21:53.000000000 +0100
++++ sipp-3.7.1/src/call.cpp	2023-07-24 11:09:12.492068706 +0100
+@@ -52,6 +52,10 @@
  #include <sys/wait.h>
+ #include <string>
  
 +#ifdef USE_UUID
 +#include <uuid/uuid.h>
@@ -64,7 +65,7 @@ diff -pubr sipp-3.6.1.orig/src/call.cpp sipp-3.6.1/src/call.cpp
  #ifdef PCAPPLAY
  #include "send_packets.h"
  #endif
-@@ -328,6 +332,11 @@ call *call::add_call(int userId, bool ip
+@@ -804,6 +808,11 @@ call *call::add_call(int userId, bool ip
  {
      static char call_id[MAX_HEADER_LEN];
  
@@ -76,7 +77,7 @@ diff -pubr sipp-3.6.1.orig/src/call.cpp sipp-3.6.1/src/call.cpp
      const char * src = call_id_string;
      int count = 0;
  
-@@ -339,6 +348,13 @@ call *call::add_call(int userId, bool ip
+@@ -815,6 +824,13 @@ call *call::add_call(int userId, bool ip
          if (*src == '%') {
              ++src;
              switch(*src++) {
@@ -88,12 +89,13 @@ diff -pubr sipp-3.6.1.orig/src/call.cpp sipp-3.6.1/src/call.cpp
 +                break;
 +#endif
              case 'u':
-                 count += snprintf(&call_id[count], MAX_HEADER_LEN-count-1,"%u", next_number);
+                 count += snprintf(&call_id[count], MAX_HEADER_LEN-count-1, "%u", next_number);
                  break;
-diff -pubr sipp-3.6.1.orig/src/sipp.cpp sipp-3.6.1/src/sipp.cpp
---- sipp-3.6.1.orig/src/sipp.cpp	2020-09-16 21:22:56.000000000 +0100
-+++ sipp-3.6.1/src/sipp.cpp	2021-08-06 10:12:43.002585200 +0100
-@@ -226,7 +226,7 @@ struct sipp_option options_table[] = {
+Only in sipp-3.7.1/src: call.cpp.orig
+diff -pubr sipp-3.7.1.orig/src/sipp.cpp sipp-3.7.1/src/sipp.cpp
+--- sipp-3.7.1.orig/src/sipp.cpp	2023-05-19 21:21:53.000000000 +0100
++++ sipp-3.7.1/src/sipp.cpp	2023-07-24 11:09:12.502068707 +0100
+@@ -229,7 +229,7 @@ struct sipp_option options_table[] = {
      {"", "Call behavior options:", SIPP_HELP_TEXT_HEADER, NULL, 0},
      {"aa", "Enable automatic 200 OK answer for INFO, NOTIFY, OPTIONS and UPDATE.", SIPP_OPTION_SETFLAG, &auto_answer, 1},
      {"base_cseq", "Start value of [cseq] for each call.", SIPP_OPTION_CSEQ, NULL, 1},
@@ -102,3 +104,4 @@ diff -pubr sipp-3.6.1.orig/src/sipp.cpp sipp-3.6.1/src/sipp.cpp
      {"d", "Controls the length of calls. More precisely, this controls the duration of 'pause' instructions in the scenario, if they do not have a 'milliseconds' section. Default value is 0 and default unit is milliseconds.", SIPP_OPTION_TIME_MS, &duration, 1},
      {"deadcall_wait", "How long the Call-ID and final status of calls should be kept to improve message and error logs (default unit is ms).", SIPP_OPTION_TIME_MS, &deadcall_wait, 1},
      {"auth_uri", "Force the value of the URI for authentication.\n"
+Only in sipp-3.7.1/src: sipp.cpp.orig
